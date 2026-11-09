@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/svalbard-watch/swi-avalanche-caching/compare/0.2.1...0.2.2) (2026-11-09)
+
+
+### Bug Fixes
+
+* update ci security repo ([78f1cc6](https://github.com/svalbard-watch/swi-avalanche-caching/commit/78f1cc685148c2d5dca3da0829f0fb22aa164177))
+
 ## [0.2.1](https://github.com/UNIS-Svalbard-Weather-Information/swi-avalanche-caching/compare/0.2.0...0.2.1) (2026-10-28)
 
 
