@@ -30,6 +30,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy only necessary files from the builder stage
 COPY --from=builder /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
+# The job never installs packages at runtime: remove the pip, setuptools and wheel that came with
+# the builder's site-packages (and pip's vendored copies of urllib3, msgpack, certifi, ...), so
+# they are neither exposed nor flagged by image scanners. The base image has none of them.
+RUN python -m pip uninstall -y pip setuptools wheel 2>/dev/null || true
 
 # The job writes next to its code (app.log, ./maps) and into three volumes. Create the
 # mount points owned by the job user: an empty named volume inherits the ownership of the
