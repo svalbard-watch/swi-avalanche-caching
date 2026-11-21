@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/svalbard-watch/swi-avalanche-caching/compare/0.2.2...0.3.0) (2026-11-21)
+
+
+### Features
+
+* **docker:** build on swi-cron-base ([b84b7b0](https://github.com/svalbard-watch/swi-avalanche-caching/commit/b84b7b040fbd38cdec9b6b499f26fddacac12e6a))
+* **docker:** build on swi-cron-base ([977e11d](https://github.com/svalbard-watch/swi-avalanche-caching/commit/977e11db04f0f319f21fcf01030458a2d82d014e))
+
+
+### Bug Fixes
+
+* **deps:** remove the stale duplicate ruff entry from uv.lock ([83fc583](https://github.com/svalbard-watch/swi-avalanche-caching/commit/83fc583e77f0443dd466121bdeba2d22779f3aa9))
+* **docker:** remove pip again after copying the builder's packages ([71cad27](https://github.com/svalbard-watch/swi-avalanche-caching/commit/71cad27a1ed925c934b69507ff9ab34c64a66930))
+
 ## [0.2.2](https://github.com/svalbard-watch/swi-avalanche-caching/compare/0.2.1...0.2.2) (2026-11-09)
 
 
