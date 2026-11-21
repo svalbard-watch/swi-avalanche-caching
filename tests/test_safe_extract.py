@@ -20,9 +20,8 @@ def test_safe_extractall_blocks_traversal(tmp_path):
     _make_zip(archive, ["../escape.txt"])
     dest = tmp_path / "out"
     dest.mkdir()
-    with zipfile.ZipFile(archive) as zf:
-        with pytest.raises(ValueError):
-            mc._safe_extractall(zf, str(dest))
+    with zipfile.ZipFile(archive) as zf, pytest.raises(ValueError):
+        mc._safe_extractall(zf, str(dest))
     assert not (tmp_path / "escape.txt").exists()
 
 
