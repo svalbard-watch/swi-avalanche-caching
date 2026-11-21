@@ -15,16 +15,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir --require-hashes -r requirements.txt
 
-# Stage 3: Runtime
-FROM python:3.13-slim
-# The project reserves uids above 9000. Every SWI image that shares a volume with this one
-# (the other cron jobs, mapproxy, the read-only data services) uses the same uid and gid,
-# so files written here are owned by the same user everywhere.
-ARG APP_UID=9001
-ARG APP_GID=9001
-WORKDIR /swi
+# Stage 3: Runtime, on the shared cron base image (swi-cron-base). It provides the unprivileged
+# swi user (uid/gid 9001, shared with the other SWI images that use the same volumes), /swi, the
+# run lock, the entrypoint and the healthcheck; see https://github.com/svalbard-watch/swi-cron-base
+# Its tag must match the Python version of the builder stage above.
+FROM ghcr.io/svalbard-watch/swi-cron-base:1.0.0-py3.13
 
-# Install system dependencies required by rasterio
+# System packages need root; the base image ends with USER swi.
+USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgdal-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -32,28 +30,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy only necessary files from the builder stage
 COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
-# The job never installs packages at runtime: remove pip (and its vendored copies of
-# urllib3, msgpack, ...) so they are neither exposed nor flagged by image scanners.
-RUN python -m pip uninstall -y pip setuptools wheel 2>/dev/null || true
-
-# Unprivileged user with a home directory (entrypoint.sh writes ~/.bashrc)
-RUN groupadd --gid "${APP_GID}" swi \
-    && useradd --uid "${APP_UID}" --gid "${APP_GID}" --create-home --shell /usr/sbin/nologin swi
 
 # The job writes next to its code (app.log, ./maps) and into three volumes. Create the
 # mount points owned by the job user: an empty named volume inherits the ownership of the
 # directory it is mounted on, so a fresh volume is writable without any runtime chown.
 RUN mkdir -p /swi/data /swi/metadata /swi/static \
-    && chown swi:swi /swi /swi/data /swi/metadata /swi/static
+    && chown swi:swi /swi/data /swi/metadata /swi/static
 
 # Copy application code (stays owned by root: the job can create files here, not edit code)
 COPY . .
 
-# Make the entrypoint script executable
-RUN chmod +x ./entrypoint.sh
-RUN chmod +x ./run-cron.sh
+# run-cron (from the base image) runs this once per start, one run at a time.
+ENV SWI_CRON_COMMAND="python /swi/main.py"
 
 USER swi
-
-# Use the entrypoint script
-ENTRYPOINT ["./entrypoint.sh"]
